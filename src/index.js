@@ -9,7 +9,7 @@ import {Route, Link, BrowserRouter as Router} from 'react-router-dom';
 const routing = (
 	<Router>
 		<div>
-			<Route path="/" component={Login} />
+			<Route path="/" component={App} />
 		</div>
 	</Router>
 );
