@@ -1,111 +1,114 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Login from "./Login.jsx";
 
-function test(testy){
-  console.log(this.findSongs(this.getPhrase()))
+let auth =getAuth();
+
+async function findSongs(phrase) {
+	let phrases = await getPhrases(phrase);
+	console.log(phrases);
+
+	findSongByName(phrases[phrases.length-1], auth);
+
+
 }
 
-function findSongs(phrase) {
-	var length = songLength(phrase);
-	const largest_length = length;
-	while (length > 0) {
-		//check combinations
-		for (var i=0; i<=largest_length-length; i++) {
-			var possibleName = getWords(phrase, i, length);
-			if (inDataBase(possibleName)) {
-				var left_str = getLeftHalf(phrase, i);
-        var right_str = getRightHalf(phrase, i+length+1);
-        
-				return findSongs(left_str) + "|" + possibleName + "|" + findSongs(right_str);
-			}
+function getPhrases(phrase){
+	let words = phrase.split(" ");
+	let returnPhrases = [];
+
+
+	for(let i=words.length; i>0; i--){
+		let buffer = getPhrasesOfLength(phrase, i);
+		for(let j=0; j<buffer.length; j++){
+			returnPhrases.push(buffer[j]);
 		}
-		length--;
-		//nothing at this level! guess we go deeper!
 	}
-	return "";
+
+	return returnPhrases;
 }
 
-//gets number of words in the phrase
-function songLength(phrase) {
-  return phrase.split(" ").length;
+function getPhrasesOfLength(phrase, length){
+	let words = phrase.split(" ");
+	let returnPhrases = [];
+
+	if(length>words.length){
+		console.log("Length too long");
+		return null;
+	}else{
+		//Do Stuff
+		for(let i=0; i<=words.length-length; i++){
+			returnPhrases.push(words.slice(i, i+length).join(" "));
+		}
+	}
+
+	return returnPhrases;
 }
 
-//TODO: edit to communicate with Spotify
-function inDataBase(name){
-	name = name.toLowerCase();
-  var arr = ["I", "Kinda Like", "You", "and", "I Wanted to Tell You"];
-  for (var i = 0; i < arr.length; i++){
-    if (arr[i].toLowerCase() == name) {
-    	return true;
-    }
-  }
-  return false;
+
+async function findSongByName(name, auth){
+	let request = await fetch("https://api.spotify.com/v1/search?q="+name+"&type=track&market=US", {
+		method: "GET",
+		headers: {
+			'Authorization': 'Bearer ' + auth
+		}
+	})
+
+	let data = await request.json();
+	let songs = [];
+
+	data["tracks"]["items"].forEach((track)=> {
+		songs.push(track["name"]);
+	});
+
+	console.log(songs);
 }
 
-
-//returns the string that follows the following 2 conditions:
-//starts with the (ith) word 
-//contains j words
-function getWords(phrase, i, j) {
-  var arr = phrase.split(" ");
-  var ans = "";
-  for(var k=i; k < i + j; k++){
-    ans += arr[k] + " ";
-  }
-  return ans.substring(0, ans.length - 1);
-
-}
-//get i words, starting at the beginning
-function getLeftHalf(phrase, i) {
-  var arr = phrase.split(" ");
-  var ans = "";
-  for (var j = 0; j < i; j++ ){
-    ans += arr[j] + " ";
-  }
-  return ans;
+function getAuth(){
+	return window.location.hash.substring(1).split("&")[0].split("=")[1]
 }
 
-//get word #i and beyond!
-function getRightHalf(phrase, i) {
-  var arr = phrase.split(" ");
-  var ans = "";
-  for (var j = i-1; j < arr.length; j++ ){
-    ans += arr[j] + " ";
-  }
-  return ans;
-}
+class App extends React.Component{
+	constructor(props){
+		super(props)
+		this.findSongs = findSongs;
+		this.getAuth = getAuth;
 
-class App extends React.Component{ 
-  constructor(props){
-    super(props)
-    this.findSongs = findSongs;
-    this.test = test;
-  }
+		this.state = {value: ""}
+		this.handleChange = this.handleChange.bind(this)
+	}
 
-  getPhrase(){
-    return document.getElementById('forrest-kun').value;
-  }
-  render(){
-    return(
-      <div className="App">
-        <h1>Welcome to Memify</h1>
-          <header>
-          <Login/>
-          <p>Create meme spotify playlists.</p>
-          <p>This was created at Hack@WPI 2020 by Alex Bolduc, Luke Deratzou, Timothy Kwan, and Frederick (Forrest) Miller</p>
-          <fieldset>
-          <p>
-            <textarea id="forrest-kun"> </textarea>
-          </p>
-          </fieldset>
-          <button onClick={this.test.bind(this)} className="explorebutton">GO</button>
-          <p id="alex-senpai"></p>
-          </header>
-      </div>
-    );
-  };
+	handleChange(event){
+		this.setState({value: event.target.value})
+	}
+
+
+	getPhrase(){
+		if(this.componentDidMount){
+			return document.getElementById('forrest-kun').value;
+		}else{
+			return "ERROR"
+		}
+	}
+	render(){
+		return(
+			<div className="App">
+			<h1>Welcome to Memify</h1>
+			<header>
+			<Login/>
+			<p>Create meme spotify playlists.</p>
+			<p>This was created at Hack@WPI 2020 by Alex Bolduc, Luke Deratzou, Timothy Kwan, and Frederick (Forrest) Miller</p>
+			<fieldset>
+			<p>
+			<input value={this.state.value} onChange={this.handleChange} id='forrest-kun'/>
+			</p>
+			</fieldset>
+			<button onClick={this.findSongs.bind(this, this.state.value)}>Go</button>
+			<p id="alex-senpai"></p>
+			</header>
+			</div>
+		);
+	};
 }
 
 export default App;

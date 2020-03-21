@@ -1,0 +1,169 @@
+<style>
+body {
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  padding:15px;
+  background-color:#114411;
+  color:#DDDDDD;
+  font-family:"Comic Sans MS";
+}
+h1 {
+	text-align:center;
+}
+  .explorebutton {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #1ED761), color-stop(1, #0f7033));
+	background:-moz-linear-gradient(top, #1ED761 5%, #0f7033 100%);
+	background:-webkit-linear-gradient(top, #1ED761 5%, #0f7033 100%);
+	background:-o-linear-gradient(top, #1ED761 5%, #0f7033 100%);
+	background:-ms-linear-gradient(top, #1ED761 5%, #0f7033 100%);
+	background:linear-gradient(to bottom, #1ED761 5%, #0f7033 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#1ED761', endColorstr='#0f7033',GradientType=0);
+	background-color:#1ed761;
+	-moz-border-radius:28px;
+	-webkit-border-radius:28px;
+	border-radius:28px;
+	border:1px solid #18ab29;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Verdana;
+	font-size:20px;
+	font-weight:bold;
+	padding:16px 31px;
+	text-decoration:none;
+	text-shadow:1px 2px 0px #2f6627;
+}
+.explorebutton:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #0f7033), color-stop(1, #1ED761));
+	background:-moz-linear-gradient(top, #0f7033 5%, #1ED761 100%);
+	background:-webkit-linear-gradient(top, #0f7033 5%, #1ED761 100%);
+	background:-o-linear-gradient(top, #0f7033 5%, #1ED761 100%);
+	background:-ms-linear-gradient(top, #0f7033 5%, #1ED761 100%);
+	background:linear-gradient(to bottom, #0f7033 5%, #1ED761 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#0f7033', endColorstr='#1ED761',GradientType=0);
+	background-color:#AFAE3E;
+	color:#eeeeee;
+}
+.explorebutton:active {
+	position:relative;
+	top:1px;
+}
+
+</style>
+<!--THIS IS A COMMENT-->
+<h1>Welcome to Memify</h1>
+<hr>
+<h2>Login</h2> <!--This is the login button @ alex for your login code to go-->
+<p>Create meme spotify playlists.</p>
+
+<fieldset>
+ <p>
+          <label>Enter Phrase:     </label>
+   <br>
+          <textarea id="forrest-kun"> </textarea>
+        </p>
+</fieldset>
+<button onclick="findSongs();" class="explorebutton">GO</button>
+<p id="alex-senpai"></p>
+<br>
+<br>
+<p><i>This was created at Hack@WPI 2020 by Alex Bolduc, Luke Deratzou, Timothy Kwan, and Frederick (Forrest) Miller</i></p>
+<script>
+function findSongs() {
+	var tim_sama = document.getElementById('forrest-kun').value;
+	var luke_tan = findSong(tim_sama);
+  console.log(luke_tan);
+  document.getElementById('alex-senpai').innerHTML = 		luke_tan;
+  return strToArr(luke_tan);
+}
+  
+function strToArr(str) {
+	var arr = [];
+  var count=0;
+  var temp = "";
+  for(var i=0; i<str.length; i++) {
+    if(str.charAt(i)=='|') {
+      arr[count++]=temp;
+      temp="";
+  } else {
+   temp += str.charAt(i); 
+  }
+  }
+  arr[count]=temp;
+    return arr;
+  
+}
+
+function findSong(phrase) {
+	var length = songLength(phrase);
+	const largest_length = length;
+	while (length > 0) {
+		//check combinations
+		for (var i=0; i<=largest_length-length; i++) {
+			var possibleName = getWords(phrase, i, length);
+			if (inDataBase(possibleName)) {
+				var left_str = getLeftHalf(phrase, i);
+				var right_str = getRightHalf(phrase, i+length+1);
+				return findSong(left_str) + "|" + possibleName + "|" + findSong(right_str);
+			}
+		}
+		length--;
+		//nothing at this level! guess we go deeper!
+	}
+	return "";
+}
+
+//gets number of words in the song
+function songLength(phrase) {
+	//forrest will implement
+  var arr = phrase.split(" ");
+  var total = arr.length;
+  return total;
+}
+function inDataBase(name){
+	name = name.toLowerCase();
+  var arr = ["I", "Kinda Like", "You", "and", "I Wanted to Tell You"];
+  for (var i = 0; i < arr.length; i++){
+    if (arr[i].toLowerCase() == name) {
+    	return true;
+    }
+  }
+  return false;
+}
+
+
+//returns the string that follows the following 2 conditions:
+//starts with the (ith) word 
+//contains j words
+function getWords(phrase, i, j) {
+  var arr = phrase.split(" ");
+  var ans = "";
+  for(var k=i; k < i + j; k++){
+    ans += arr[k] + " ";
+  }
+  return ans.substring(0, ans.length - 1);
+
+}
+//get i words, starting at the beginning
+function getLeftHalf(phrase, i) {
+  var arr = phrase.split(" ");
+  var ans = "";
+  for (var j = 0; j < i; j++ ){
+    ans += arr[j] + " ";
+  }
+  return ans;
+}
+
+//get word #i and beyond!
+function getRightHalf(phrase, i) {
+  var arr = phrase.split(" ");
+  var ans = "";
+  for (var j = i-1; j < arr.length; j++ ){
+    ans += arr[j] + " ";
+  }
+  return ans;
+}
+
+
+//for getLeftHalf and getRightHalf, if you were to get zero words, return whitespace
+//so songLength will interpret the songlength as 0!
+</script>

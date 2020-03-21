@@ -4,7 +4,7 @@ import {Redirect} from 'react-router-dom';
 export const authEndpoint = 'https://accounts.spotify.com/authorize';
 
 const clientId = "9b19b563f39d450bbff64778f1019250";
-const redirectUri = "http://130.215.213.233:3000";
+const redirectUri = "http://localhost:3000";
 const scopes = [
 	"user-read-private",
 	"user-read-email",
